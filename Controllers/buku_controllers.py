@@ -147,10 +147,7 @@ class BukuController:
         pilihan = self.view.tabel.selection()
 
         if not pilihan:
-            messagebox.showwarning(
-                "Peringatan",
-                "Pilih buku yang ingin dihapus!"
-            )
+            messagebox.showwarning("Peringatan", "Pilih buku yang ingin dihapus!")
             return
 
         data = self.view.tabel.item(pilihan[0], "values")
@@ -171,10 +168,10 @@ class BukuController:
             self.bersihkan_form()
             self.muat_data_tabel()
         else:
+            # Pesan ini akan muncul jika buku masih terkait dengan tabel peminjaman
             messagebox.showerror(
-                "Error",
-                "Gagal menghapus data buku"
+                "Gagal Menghapus",
+                "Buku ini tidak dapat dihapus karena masih ada riwayat peminjamannya!"
             )
-
     def run(self):
         self.view.mainloop()

@@ -30,30 +30,28 @@ class BukuView(ctk.CTk):
 
         self.entry_tahun = ctk.CTkEntry(self.frame_kiri, placeholder_text="Tahun Terbit (Misal: 2024)")
         self.entry_tahun.pack(pady=10, padx=15, fill="x")
-
         
         # Tombol Aksi
         self.btn_simpan = ctk.CTkButton(
-    self.frame_kiri,
-    text="Simpan Data",
-    fg_color="green"
-)
+            self.frame_kiri,
+            text="Simpan Data",
+            fg_color="green"
+        )
         self.btn_simpan.pack(pady=10, padx=15, fill="x")
 
         self.btn_update = ctk.CTkButton(
-        self.frame_kiri,
-        text="Perbarui Data",
-        fg_color="orange"
+            self.frame_kiri,
+            text="Perbarui Data",
+            fg_color="orange"
         )
         self.btn_update.pack(pady=10, padx=15, fill="x")
 
         self.btn_hapus = ctk.CTkButton(
-    self.frame_kiri,
-    text="Hapus Data",
-    fg_color="red"
-)
+            self.frame_kiri,
+            text="Hapus Data",
+            fg_color="red"
+        )
         self.btn_hapus.pack(pady=10, padx=15, fill="x")
-
 
         # ==========================================
         # FRAME KANAN: TABEL DAFTAR BUKU
@@ -82,9 +80,42 @@ class BukuView(ctk.CTk):
 
         self.tabel.pack(fill="both", expand=True, padx=15, pady=10)
 
+
+    # Menjadi seperti ini (tanpa spasi):
+        self.tabel.bind("<<TreeviewSelect>>", self.item_dipilih)    
+
+    def item_dipilih(self, event):
+        """Fungsi otomatis untuk mengisi form di sebelah kiri saat baris tabel diklik"""
+        selected_item = self.tabel.selection()
+        if selected_item:
+            item = self.tabel.item(selected_item)
+            record = item['values']
+            
+            # Masukkan data ke kotak input
+            self.entry_judul.delete(0, "end")
+            self.entry_judul.insert(0, record[1])
+            
+            self.entry_penulis.delete(0, "end")
+            self.entry_penulis.insert(0, record[2])
+            
+            self.entry_tahun.delete(0, "end")
+            self.entry_tahun.insert(0, record[3])
+
+    def ambil_id_terpilih(self):
+        """Mengambil ID dari baris tabel yang sedang disorot (berguna untuk Hapus/Update)"""
+        selected_item = self.tabel.selection()
+        if selected_item:
+            item = self.tabel.item(selected_item)
+            return item['values'][0] # Mengembalikan nilai ID pada kolom pertama
+        return None
+
+    def bersihkan_form(self):
+        """Mengosongkan kembali form input"""
+        self.entry_judul.delete(0, "end")
+        self.entry_penulis.delete(0, "end")
+        self.entry_tahun.delete(0, "end")
+
 # Blok eksekusi untuk menguji tampilan grafis
 if __name__ == "__main__":
     app = BukuView()
     app.mainloop()
-
-    
