@@ -31,9 +31,29 @@ class BukuView(ctk.CTk):
         self.entry_tahun = ctk.CTkEntry(self.frame_kiri, placeholder_text="Tahun Terbit (Misal: 2024)")
         self.entry_tahun.pack(pady=10, padx=15, fill="x")
 
+        
         # Tombol Aksi
-        self.btn_simpan = ctk.CTkButton(self.frame_kiri, text="Simpan Data", fg_color="green")
-        self.btn_simpan.pack(pady=20, padx=15, fill="x")
+        self.btn_simpan = ctk.CTkButton(
+    self.frame_kiri,
+    text="Simpan Data",
+    fg_color="green"
+)
+        self.btn_simpan.pack(pady=10, padx=15, fill="x")
+
+        self.btn_update = ctk.CTkButton(
+        self.frame_kiri,
+        text="Perbarui Data",
+        fg_color="orange"
+        )
+        self.btn_update.pack(pady=10, padx=15, fill="x")
+
+        self.btn_hapus = ctk.CTkButton(
+    self.frame_kiri,
+    text="Hapus Data",
+    fg_color="red"
+)
+        self.btn_hapus.pack(pady=10, padx=15, fill="x")
+
 
         # ==========================================
         # FRAME KANAN: TABEL DAFTAR BUKU
@@ -66,3 +86,5 @@ class BukuView(ctk.CTk):
 if __name__ == "__main__":
     app = BukuView()
     app.mainloop()
+
+    
