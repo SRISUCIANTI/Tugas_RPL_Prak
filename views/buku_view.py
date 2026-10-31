@@ -2,10 +2,11 @@ import customtkinter as ctk
 from tkinter import ttk
 
 class BukuView(ctk.CTk):
-    def __init__(self):
+    def __init__(self, role="admin"):
         super().__init__()
+        self.role = role
         self.title("Sistem Manajemen Perpustakaan")
-        self.geometry("800x450")
+        self.geometry("800x480")
 
         # Konfigurasi Grid Utama (1 Baris, 2 Kolom)
         self.grid_columnconfigure(0, weight=1) # Kolom Kiri (Form)
@@ -15,7 +16,6 @@ class BukuView(ctk.CTk):
         # ==========================================
         # FRAME KIRI: FORMULIR INPUT BUKU
         # ==========================================
-
         self.frame_kiri = ctk.CTkFrame(self)
         self.frame_kiri.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
 
@@ -53,10 +53,18 @@ class BukuView(ctk.CTk):
         )
         self.btn_hapus.pack(pady=10, padx=15, fill="x")
 
+        # Tombol Logout
+        self.btn_logout = ctk.CTkButton(
+            self.frame_kiri,
+            text="Logout",
+            fg_color="#D9534F",
+            command=self.logout
+        )
+        self.btn_logout.pack(pady=20, padx=15, fill="x")
+
         # ==========================================
         # FRAME KANAN: TABEL DAFTAR BUKU
         # ==========================================
-
         self.frame_kanan = ctk.CTkFrame(self)
         self.frame_kanan.grid(row=0, column=1, padx=10, pady=10, sticky="nsew")
 
@@ -80,9 +88,27 @@ class BukuView(ctk.CTk):
 
         self.tabel.pack(fill="both", expand=True, padx=15, pady=10)
 
-
-    # Menjadi seperti ini (tanpa spasi):
+        # Event Binding Tabel
         self.tabel.bind("<<TreeviewSelect>>", self.item_dipilih)    
+
+        # Jalankan pengecekan otorisasi role
+        self.terapkan_otorisasi()
+
+    def terapkan_otorisasi(self):
+        """Mengunci tombol Perbarui dan Hapus jika role pengguna adalah anggota"""
+        if self.role.lower() == "anggota":
+            self.btn_update.configure(state="disabled", fg_color="gray")
+            self.btn_hapus.configure(state="disabled", fg_color="gray")
+
+    def logout(self):
+        """Menutup jendela BukuView dan kembali ke LoginView"""
+        self.destroy()
+        try:
+            from views.login_view import LoginView
+            app_login = LoginView()
+            app_login.mainloop()
+        except ImportError:
+            pass
 
     def item_dipilih(self, event):
         """Fungsi otomatis untuk mengisi form di sebelah kiri saat baris tabel diklik"""
@@ -91,7 +117,6 @@ class BukuView(ctk.CTk):
             item = self.tabel.item(selected_item)
             record = item['values']
             
-            # Masukkan data ke kotak input
             self.entry_judul.delete(0, "end")
             self.entry_judul.insert(0, record[1])
             
@@ -102,20 +127,13 @@ class BukuView(ctk.CTk):
             self.entry_tahun.insert(0, record[3])
 
     def ambil_id_terpilih(self):
-        """Mengambil ID dari baris tabel yang sedang disorot (berguna untuk Hapus/Update)"""
         selected_item = self.tabel.selection()
         if selected_item:
             item = self.tabel.item(selected_item)
-            return item['values'][0] # Mengembalikan nilai ID pada kolom pertama
+            return item['values'][0]
         return None
 
     def bersihkan_form(self):
-        """Mengosongkan kembali form input"""
         self.entry_judul.delete(0, "end")
         self.entry_penulis.delete(0, "end")
         self.entry_tahun.delete(0, "end")
-
-# Blok eksekusi untuk menguji tampilan grafis
-if __name__ == "__main__":
-    app = BukuView()
-    app.mainloop()

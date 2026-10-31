@@ -1,3 +1,8 @@
+import sys
+import os
+
+# Menambahkan direktori utama proyek ke system path Python secara otomatis
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import tkinter.messagebox as messagebox
 from models.buku_model import BukuModel
@@ -5,9 +10,13 @@ from views.buku_view import BukuView
 
 
 class BukuController:
-    def __init__(self):
+    def __init__(self, user_role="anggota"):
+        self.user_role = user_role
         self.model = BukuModel()
         self.view = BukuView()
+
+        # Menampilkan informasi role pada judul jendela aplikasi
+        self.view.title(f"Sistem Manajemen Perpustakaan - Mode: {self.user_role.upper()}")
 
         # Menghubungkan tombol dengan fungsi controller
         self.view.btn_simpan.configure(command=self.simpan_data)
@@ -16,6 +25,15 @@ class BukuController:
 
         # Memilih baris buku pada tabel
         self.view.tabel.bind("<<TreeviewSelect>>", self.pilih_buku)
+
+        # OTORISASI: Jika bukan admin, nonaktifkan form input dan tombol aksi manajemen data
+        if self.user_role != "admin":
+            self.view.btn_simpan.configure(state="disabled", text="Akses Terkunci (Khusus Admin)")
+            self.view.btn_update.configure(state="disabled")
+            self.view.btn_hapus.configure(state="disabled")
+            self.view.entry_judul.configure(state="disabled")
+            self.view.entry_penulis.configure(state="disabled")
+            self.view.entry_tahun.configure(state="disabled")
 
         # Memuat data saat aplikasi dibuka
         self.muat_data_tabel()
@@ -40,7 +58,7 @@ class BukuController:
                     buku["tahun_terbit"]
                 )
             )
-
+    
     def bersihkan_form(self):
         self.view.entry_judul.delete(0, "end")
         self.view.entry_penulis.delete(0, "end")
@@ -54,13 +72,19 @@ class BukuController:
 
         data = self.view.tabel.item(pilihan[0], "values")
 
-        # Mengisi form berdasarkan baris yang dipilih
-        self.bersihkan_form()
-        self.view.entry_judul.insert(0, data[1])
-        self.view.entry_penulis.insert(0, data[2])
-        self.view.entry_tahun.insert(0, data[3])
+        # Mengisi form berdasarkan baris yang dipilih (hanya aktif jika admin)
+        if self.user_role == "admin":
+            self.bersihkan_form()
+            self.view.entry_judul.insert(0, data[1])
+            self.view.entry_penulis.insert(0, data[2])
+            self.view.entry_tahun.insert(0, data[3])
 
     def simpan_data(self):
+        # Proteksi ganda di level Controller
+        if self.user_role != "admin":
+            messagebox.showerror("Akses Ditolak", "Anda tidak memiliki izin untuk menambah data!")
+            return
+
         judul = self.view.entry_judul.get().strip()
         penulis = self.view.entry_penulis.get().strip()
         tahun = self.view.entry_tahun.get().strip()
@@ -91,6 +115,11 @@ class BukuController:
             messagebox.showerror("Error", "Gagal menyimpan data buku")
 
     def update_data(self):
+        # Proteksi ganda di level Controller
+        if self.user_role != "admin":
+            messagebox.showerror("Akses Ditolak", "Anda tidak memiliki izin untuk memperbarui data!")
+            return
+
         pilihan = self.view.tabel.selection()
 
         if not pilihan:
@@ -144,6 +173,11 @@ class BukuController:
             )
 
     def hapus_data(self):
+        # Proteksi ganda di level Controller
+        if self.user_role != "admin":
+            messagebox.showerror("Akses Ditolak", "Anda tidak memiliki izin untuk menghapus data!")
+            return
+
         pilihan = self.view.tabel.selection()
 
         if not pilihan:
@@ -173,5 +207,11 @@ class BukuController:
                 "Gagal Menghapus",
                 "Buku ini tidak dapat dihapus karena masih ada riwayat peminjamannya!"
             )
+
     def run(self):
         self.view.mainloop()
+
+
+if __name__ == "__main__":
+    app_controller = BukuController(user_role="admin")
+    app_controller.run()
